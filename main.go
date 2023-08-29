@@ -17,21 +17,36 @@ func main() {
 
 	// アクセストークンを使用してクライアントを生成する
 	api := slack.New(tkn)
-	post(api)
+	postImage(api)
 }
 
 func post(api *slack.Client) {
 	// MsgOptionText() の第二引数に true を設定すると特殊文字をエスケープする
-	_, _, err := api.PostMessage("#general", slack.MsgOptionText("Hello World", true))
+	_, _, err := api.PostMessage("#b", slack.MsgOptionText("Hello World", true))
 	if err != nil {
 		panic(err)
 	}
 }
 
+// チャンネルに参加する
+func join(api *slack.Client, channelID string) {
+	_, _, _, err := api.JoinConversation(channelID)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func postImage(api *slack.Client) {
+	file, err := os.Open("yopparai_sakeguse_warui_man.png")
+	var param slack.FileUploadParameters
+	param.Reader = file
+	param.Filename = "upload file name"
+	param.Channels = []string{"#a"}
+	str, err := api.UploadFile(param)
+	fmt.Println(str, err)
+}
+
 func group(api *slack.Client) {
-	// If you set debugging, it will log all requests to the console
-	// Useful when encountering issues
-	// slack.New("YOUR_TOKEN_HERE", slack.OptionDebug(true))
 	groups, err := api.GetUserGroups(slack.GetUserGroupsOptionIncludeUsers(false))
 	if err != nil {
 		fmt.Printf("%s\n", err)
