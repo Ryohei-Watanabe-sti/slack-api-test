@@ -1,0 +1,19 @@
+{
+    "channel": "#a",
+    "blocks": [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "<https://google.com|お店の名前> -ラーメン,中華,定食\n:star::star::star::star:☆\n>本社前の定食屋さんに行ってまいりました！\n>おいしかったです！"
+            },
+            "accessory": {
+                "type": "image",
+                "image_url": "https://pbs.twimg.com/profile_images/625633822235693056/lNGUneLX_400x400.jpg",
+                "alt_text": "ra-men"
+            }
+        }
+    ],
+    "username": "My bot",
+    "icon_url": "https://pbs.twimg.com/profile_images/625633822235693056/lNGUneLX_400x400.jpg"
+}
