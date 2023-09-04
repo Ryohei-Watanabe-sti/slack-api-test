@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -12,8 +11,15 @@ import (
 )
 
 func main() {
-	loadJsonFile()
+	tkn := readEnv()
+	file, err := os.Open("requestBody.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
 
+	body := io.Reader(file)
+	postMessage(tkn, body)
 }
 
 func readEnv() string {
@@ -25,6 +31,7 @@ func readEnv() string {
 	return tkn
 }
 
+/*
 func getExample() {
 	url := "http://example.com"
 
@@ -37,15 +44,18 @@ func getExample() {
 	byteArray, _ := io.ReadAll(resp.Body)
 	fmt.Println(string(byteArray))
 }
+*/
 
-func postExample() {
+func postMessage(tkn string, body io.Reader) {
 	url := "https://slack.com/api/chat.postMessage"
 
-	req, err := http.NewRequest("POST", url, nil)
+	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		fmt.Println(err)
 	}
-	req.Header.Set("Authorization", "Bearer access-token")
+	value := "Bearer " + tkn
+	req.Header.Set("Authorization", value)
+	req.Header.Set("Content-Type", "application/json")
 
 	client := new(http.Client)
 	resp, err := client.Do(req)
@@ -57,20 +67,4 @@ func postExample() {
 
 	byteArray, _ := io.ReadAll(resp.Body)
 	fmt.Println(string(byteArray))
-}
-
-func loadJsonFile() map[string]any {
-	file, err := os.Open("reviewTest.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	var rawJson map[string]any
-	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&rawJson); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(rawJson)
-	return rawJson
 }
