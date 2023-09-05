@@ -20,9 +20,18 @@ func main() {
 	}
 	defer file.Close()
 
-	body := io.Reader(file)
-	postMessage(tkn, body)
-	uploadFile(tkn)
+	// body := io.Reader(file)
+	// postMessage(tkn, body)
+	// uploadFile(tkn)
+	usersList := getUserIDsInChannel(tkn, "C05QEV93KTJ")
+	for _, v := range usersList {
+		var resp UsersInfo
+		resp = getUserInfo(tkn, v)
+		fmt.Println("id:", v)
+		fmt.Println("name:", resp.User.Name)
+		fmt.Println("email:", resp.User.Profile.Email)
+		fmt.Println("iconImage:", resp.User.Profile.Image1024)
+	}
 }
 
 func readEnv() string {
@@ -64,7 +73,7 @@ func uploadFile(tkn string) {
 	writer := multipart.NewWriter(&requestBody)
 
 	// ファイルを添付
-	file, err := os.Open("yopparai_sakeguse_warui_man.png") // 送信したいファイルのパスを指定
+	file, err := os.Open("yopparai_sakeguse_warui_man.png")
 	if err != nil {
 		panic(err)
 	}
