@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 // チャンネルに所属しているユーザーIDの一覧を取得する
@@ -128,4 +129,22 @@ type UsersInfo struct {
 		IsEmailConfirmed       bool   `json:"is_email_confirmed"`
 		WhoCanShareContactCard string `json:"who_can_share_contact_card"`
 	} `json:"user"`
+}
+
+func welcome(botToken string, userID string, channelID string) {
+	var newUser UsersInfo = getUserInfo(botToken, userID)
+	var bodyStr string = `{
+			"channel": "` + channelID + `",
+			"blocks": [
+				{
+					"type": "section",
+					"text": {
+						"type": "mrkdwn",
+						"text": "ようこそ！` + newUser.User.Name + `さん"
+					}
+				}
+			]
+		}`
+	body := strings.NewReader(bodyStr)
+	postMessage(botToken, body)
 }
