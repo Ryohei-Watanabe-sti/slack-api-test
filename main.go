@@ -39,10 +39,11 @@ func main() {
 	// 	fmt.Println("iconImage:", resp.User.Profile.Image1024)
 	// }
 
-	//socketモードテスト
+	//socketモード
 	socket(tkn, socketKey)
 }
 
+// APIキーの読み込み
 func readEnv() (string, string) {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -53,6 +54,7 @@ func readEnv() (string, string) {
 	return tkn, socketKey
 }
 
+// bodyに渡された投稿先のchannelとメッセージの内容を投稿する
 func postMessage(tkn string, body io.Reader) {
 	url := "https://slack.com/api/chat.postMessage"
 
@@ -77,6 +79,7 @@ func postMessage(tkn string, body io.Reader) {
 	fmt.Println(string(byteArray))
 }
 
+// 画像ファイルをchannel:#aにアップロードする
 func uploadFile(tkn string) {
 	// リクエストボディを作成
 	var requestBody bytes.Buffer
@@ -126,8 +129,10 @@ func uploadFile(tkn string) {
 
 }
 
+// ソケットモード
 func socket(botToken string, appToken string) {
 
+	//tokenのチェック
 	if appToken == "" {
 		fmt.Fprintf(os.Stderr, "SLACK_APP_TOKEN must be set.\n")
 		os.Exit(1)
@@ -146,6 +151,7 @@ func socket(botToken string, appToken string) {
 		fmt.Fprintf(os.Stderr, "SLACK_BOT_TOKEN must have the prefix \"xoxb-\".")
 	}
 
+	//clientの作成
 	api := slack.New(
 		botToken,
 		slack.OptionDebug(true),
@@ -159,6 +165,7 @@ func socket(botToken string, appToken string) {
 		socketmode.OptionLog(log.New(os.Stdout, "socketmode: ", log.Lshortfile|log.LstdFlags)),
 	)
 
+	//SocketModeの起動、イベント検出時に処理を分岐
 	go func() {
 		for evt := range client.Events {
 			switch evt.Type {
@@ -224,6 +231,7 @@ func socket(botToken string, appToken string) {
 				}
 
 				client.Ack(*evt.Request, payload)
+			//スラッシュコマンドを受け取ったとき
 			case socketmode.EventTypeSlashCommand:
 				cmd, ok := evt.Data.(slack.SlashCommand)
 				if !ok {
@@ -235,32 +243,31 @@ func socket(botToken string, appToken string) {
 
 				switch cmd.Command {
 				case "/入荷":
-					arrive(botToken, cmd.ChannelID)
-				}
-
-				payload := map[string]interface{}{
-					"blocks": []slack.Block{
-						slack.NewSectionBlock(
-							&slack.TextBlockObject{
-								Type: slack.MarkdownType,
-								Text: "foo",
-							},
-							nil,
-							slack.NewAccessory(
-								slack.NewButtonBlockElement(
-									"",
-									"somevalue",
-									&slack.TextBlockObject{
-										Type: slack.PlainTextType,
-										Text: "bar",
-									},
+					//arrive(botToken, cmd.ChannelID)
+					payload := map[string]interface{}{
+						"blocks": []slack.Block{
+							slack.NewSectionBlock(
+								&slack.TextBlockObject{
+									Type: slack.MarkdownType,
+									Text: "foo",
+								},
+								nil,
+								slack.NewAccessory(
+									slack.NewButtonBlockElement(
+										"",
+										"somevalue",
+										&slack.TextBlockObject{
+											Type: slack.PlainTextType,
+											Text: "bar",
+										},
+									),
 								),
 							),
-						),
-					},
+						},
+					}
+					client.Ack(*evt.Request, payload)
 				}
 
-				client.Ack(*evt.Request, payload)
 			default:
 				fmt.Fprintf(os.Stderr, "Unexpected event type received: %s\n", evt.Type)
 			}
@@ -271,6 +278,7 @@ func socket(botToken string, appToken string) {
 
 }
 
+// 入荷コマンド時に
 func arrive(botToken string, channelID string) {
 	var bodyStr string = `{
 		"channel": "` + channelID + `",
