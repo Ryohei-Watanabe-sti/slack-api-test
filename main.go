@@ -200,6 +200,7 @@ func socket(botToken string, appToken string) {
 						}
 
 					case *slackevents.MemberJoinedChannelEvent:
+						//ユーザーがチャンネルに参加すると、ようこそとメッセージが送られる
 						welcome(botToken, ev.User, ev.Channel)
 					}
 				default:
@@ -249,18 +250,54 @@ func socket(botToken string, appToken string) {
 							slack.NewSectionBlock(
 								&slack.TextBlockObject{
 									Type: slack.MarkdownType,
-									Text: "foo",
+									Text: "入荷記録",
 								},
 								nil,
 								slack.NewAccessory(
-									slack.NewButtonBlockElement(
-										"",
-										"somevalue",
-										&slack.TextBlockObject{
-											Type: slack.PlainTextType,
-											Text: "bar",
+									&slack.SelectBlockElement{
+										Type: slack.OptTypeStatic,
+										Placeholder: &slack.TextBlockObject{
+											Type:  slack.PlainTextType,
+											Text:  "商品を選択",
+											Emoji: true,
 										},
-									),
+										ActionID: "static_select-action",
+										Options: []*slack.OptionBlockObject{
+											{
+												Text: &slack.TextBlockObject{
+													Type:  slack.PlainTextType,
+													Text:  "111",
+													Emoji: true,
+												},
+												Value: "value-0",
+											},
+											{
+												Text: &slack.TextBlockObject{
+													Type:  slack.PlainTextType,
+													Text:  "222",
+													Emoji: true,
+												},
+												Value: "value-1",
+											},
+											{
+												Text: &slack.TextBlockObject{
+													Type:  slack.PlainTextType,
+													Text:  "333",
+													Emoji: true,
+												},
+												Value: "value-2",
+											},
+										},
+									},
+
+									// slack.NewButtonBlockElement(
+									// 	"",
+									// 	"somevalue",
+									// 	&slack.TextBlockObject{
+									// 		Type: slack.PlainTextType,
+									// 		Text: "bar",
+									// 	},
+									// ),
 								),
 							),
 						},
