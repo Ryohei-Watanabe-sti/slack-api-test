@@ -220,14 +220,42 @@ func socket(botToken string, appToken string) {
 
 				switch callback.Type {
 				case slack.InteractionTypeBlockActions:
-					// See https://api.slack.com/apis/connections/socket-implement#button
+					fmt.Println("ブロックアクション！")
 
-					client.Debugf("button clicked!")
+					// ブロックアクションが発生した場合の処理
+					for _, action := range callback.ActionCallback.BlockActions {
+						fmt.Println("ブロックアクション処理開始！")
+
+						if action.ActionID == "static_select_arrive" {
+							// static_select のアクションIDでフィルタリング
+							fmt.Println("プルダウンメニューだあああ！")
+							// 選択されたオプションを取得
+							selectedOption := action.SelectedOption.Value
+
+							var sendingText string
+							// 選択されたオプションに対する処理を実行
+							switch selectedOption {
+							case "value-0":
+								sendingText = "111"
+							case "value-1":
+								sendingText = "222"
+							case "value-2":
+								sendingText = "333"
+							default:
+								// 未知のオプションが選択された場合の処理を追加
+							}
+							_, _, err := api.PostMessage(callback.Channel.ID, slack.MsgOptionText(sendingText, false))
+							if err != nil {
+								fmt.Println("PostMessageError:", err)
+							}
+						}
+					}
 				case slack.InteractionTypeShortcut:
 				case slack.InteractionTypeViewSubmission:
 					// See https://api.slack.com/apis/connections/socket-implement#modal
 				case slack.InteractionTypeDialogSubmission:
 				default:
+					fmt.Println("未知のコールバックを受信")
 
 				}
 
@@ -244,7 +272,6 @@ func socket(botToken string, appToken string) {
 
 				switch cmd.Command {
 				case "/入荷":
-					//arrive(botToken, cmd.ChannelID)
 					payload := map[string]interface{}{
 						"blocks": []slack.Block{
 							slack.NewSectionBlock(
@@ -261,7 +288,7 @@ func socket(botToken string, appToken string) {
 											Text:  "商品を選択",
 											Emoji: true,
 										},
-										ActionID: "static_select-action",
+										ActionID: "static_select_arrive",
 										Options: []*slack.OptionBlockObject{
 											{
 												Text: &slack.TextBlockObject{
@@ -289,19 +316,11 @@ func socket(botToken string, appToken string) {
 											},
 										},
 									},
-
-									// slack.NewButtonBlockElement(
-									// 	"",
-									// 	"somevalue",
-									// 	&slack.TextBlockObject{
-									// 		Type: slack.PlainTextType,
-									// 		Text: "bar",
-									// 	},
-									// ),
 								),
 							),
 						},
 					}
+
 					client.Ack(*evt.Request, payload)
 				}
 
