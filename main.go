@@ -248,6 +248,12 @@ func socket(botToken string, appToken string) {
 							if err != nil {
 								fmt.Println("PostMessageError:", err)
 							}
+						} else if action.ActionID == "hello-button" {
+							sendingText := callback.User.Name + "さん、おはこんばんにちは！"
+							_, _, err := api.PostMessage(callback.Channel.ID, slack.MsgOptionText(sendingText, false))
+							if err != nil {
+								fmt.Println("PostMessageError:", err)
+							}
 						}
 					}
 				case slack.InteractionTypeShortcut:
@@ -323,22 +329,32 @@ func socket(botToken string, appToken string) {
 					client.Ack(*evt.Request, payload)
 
 				case "/hello":
-					text := cmd.UserName + "さん、おはこんばんにちは！"
+					client.Debugf("Slash command received: %+v", cmd)
+
 					payload := map[string]interface{}{
 						"blocks": []slack.Block{
 							slack.NewSectionBlock(
 								&slack.TextBlockObject{
 									Type: slack.MarkdownType,
-									Text: text,
+									Text: "あいさつします",
 								},
 								nil,
-								nil,
+								slack.NewAccessory(
+									slack.NewButtonBlockElement(
+										"hello-button",
+										"value",
+										&slack.TextBlockObject{
+											Type: slack.PlainTextType,
+											Text: "hello",
+										},
+									),
+								),
 							),
 						},
 					}
+
 					client.Ack(*evt.Request, payload)
 				}
-
 			default:
 				fmt.Fprintf(os.Stderr, "Unexpected event type received: %s\n", evt.Type)
 			}
