@@ -320,7 +320,22 @@ func socket(botToken string, appToken string) {
 							),
 						},
 					}
+					client.Ack(*evt.Request, payload)
 
+				case "/hello":
+					text := cmd.UserName + "さん、おはこんばんにちは！"
+					payload := map[string]interface{}{
+						"blocks": []slack.Block{
+							slack.NewSectionBlock(
+								&slack.TextBlockObject{
+									Type: slack.MarkdownType,
+									Text: text,
+								},
+								nil,
+								nil,
+							),
+						},
+					}
 					client.Ack(*evt.Request, payload)
 				}
 
@@ -332,86 +347,4 @@ func socket(botToken string, appToken string) {
 
 	client.Run()
 
-}
-
-// 入荷コマンド時に
-func arrive(botToken string, channelID string) {
-	var bodyStr string = `{
-		"channel": "` + channelID + `",
-		"blocks": [
-			{
-				"type": "section",
-				"text": {
-					"type": "mrkdwn",
-					"text": "入荷記録"
-				},
-				"accessory": {
-					"type": "static_select",
-					"placeholder": {
-						"type": "plain_text",
-						"text": "商品を選択",
-						"emoji": true
-					},
-					"options": [
-						{
-							"text": {
-								"type": "plain_text",
-								"text": "111",
-								"emoji": true
-							},
-							"value": "value-0"
-						},
-						{
-							"text": {
-								"type": "plain_text",
-								"text": "222",
-								"emoji": true
-							},
-							"value": "value-1"
-						},
-						{
-							"text": {
-								"type": "plain_text",
-								"text": "333",
-								"emoji": true
-							},
-							"value": "value-2"
-						}
-					],
-					"action_id": "static_select-action"
-				}
-			},
-			{
-				"type": "input",
-				"element": {
-					"type": "plain_text_input",
-					"action_id": "plain_text_input-action"
-				},
-				"label": {
-					"type": "plain_text",
-					"text": "個数",
-					"emoji": true
-				}
-			},
-			{
-				"type": "section",
-				"text": {
-					"type": "mrkdwn",
-					"text": " "
-				},
-				"accessory": {
-					"type": "button",
-					"text": {
-						"type": "plain_text",
-						"text": "送信",
-						"emoji": true
-					},
-					"value": "click_me_123",
-					"action_id": "button-action"
-				}
-			}
-		]
-	}`
-	body := strings.NewReader(bodyStr)
-	postMessage(botToken, body)
 }
